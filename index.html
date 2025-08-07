@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>台北8日行程 & 团体记账（离线可用）</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="assets/icon-192.png">
+  <meta name="theme-color" content="#0ea5e9">
+  <meta name="description" content="个人使用的旅行行程与团体记账工具（离线可用 PWA）" />
+  <style>
+    :root { --bg:#0b1220; --card:#111827; --muted:#94a3b8; --text:#e5e7eb; --brand:#0ea5e9; --ok:#10b981; --warn:#f59e0b; --danger:#ef4444; }
+    *{ box-sizing: border-box; }
+    html,body{ margin:0; padding:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, 'PingFang SC', 'Noto Sans CJK', 'Microsoft YaHei', Arial, sans-serif; background:var(--bg); color:var(--text); }
+    header{ position:sticky; top:0; z-index:10; backdrop-filter: blur(10px); background:rgba(11,18,32,.7); border-bottom:1px solid #1f2937; }
+    .wrap{ max-width:1100px; margin:0 auto; padding:0 16px; }
+    .nav{ display:flex; gap:8px; overflow:auto; padding:10px 0; }
+    .nav a{ white-space:nowrap; text-decoration:none; color:#cbd5e1; padding:8px 12px; border-radius:999px; border:1px solid #334155; }
+    .nav a.active, .nav a:hover{ background:var(--brand); color:black; border-color:transparent; }
+    main{ padding:16px 0 100px; }
+    h2{ margin:24px 0 12px; display:flex; align-items:center; gap:8px; font-size:20px; }
+    .card{ background:var(--card); border:1px solid #1f2937; border-radius:16px; padding:16px; margin-bottom:16px; }
+    .grid{ display:grid; grid-template-columns: repeat(12, 1fr); gap:12px; }
+    .col-12{ grid-column: span 12; } .col-6{ grid-column: span 6; } .col-4{ grid-column: span 4; } .col-3{ grid-column: span 3; }
+    @media (max-width: 900px){ .col-6{ grid-column: span 12; } .col-4{ grid-column: span 12; } .col-3{ grid-column: span 6; } }
+    label{ display:block; font-size:12px; color:var(--muted); margin-bottom:6px; }
+    input, select, textarea{ width:100%; padding:10px 12px; background:#0b1020; color:var(--text); border-radius:12px; border:1px solid #334155; }
+    textarea{ min-height:90px; resize:vertical; }
+    button{ cursor:pointer; border:none; background:var(--brand); color:black; padding:10px 14px; border-radius:12px; }
+    button.ghost{ background:transparent; color:#cbd5e1; border:1px solid #334155; }
+    table{ width:100%; border-collapse: collapse; }
+    th, td{ border-bottom:1px dashed #334155; padding:10px; text-align:left; vertical-align:top; }
+    .muted{ color:var(--muted); }
+    .row{ display:flex; gap:8px; align-items:center; flex-wrap: wrap; }
+    .chip{ border:1px solid #334155; padding:6px 10px; border-radius:999px; font-size:12px; }
+    .right{ margin-left:auto; }
+    .danger{ background:var(--danger); color:white; }
+    .ok{ background:var(--ok); color:black; }
+    .warn{ background:var(--warn); color:black; }
+    .footer{ position:fixed; left:0; right:0; bottom:0; background:rgba(11,18,32,.9); border-top:1px solid #1f2937; }
+    .footer .wrap{ display:flex; gap:8px; padding:10px 16px; overflow:auto; }
+    .pill{ padding:8px 12px; border:1px solid #334155; border-radius:999px; display:flex; gap:8px; align-items:center; color:#cbd5e1; text-decoration:none; }
+    .pill.active{ background:var(--brand); color:black; border-color:transparent; }
+    .badge{ font-size:12px; padding:2px 6px; border-radius:6px; background:#0b1020; border:1px solid #334155; color:#cbd5e1; }
+    .kpi{ font-weight:700; font-size:20px; }
+    .spacer{ height:8px; }
+    .hl{ color:#22d3ee; }
+    .small{ font-size:12px; }
+  </style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="nav" id="nav"></div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section id="home" class="card">
+    <h2>🏠 首页 & 使用说明</h2>
+    <div class="grid">
+      <div class="col-6">
+        <div class="card">
+          <div class="row"><div class="kpi">团队</div><span class="badge" id="teamCount">0 人</span><span class="right small muted" id="tripDates"></span></div>
+          <div class="spacer"></div>
+          <div class="row">
+            <button onclick="App.show('team')">管理团队成员</button>
+            <button class="ghost" onclick="App.show('tasks')">待办 / 分工</button>
+            <span class="right small muted">变更日志自动记录</span>
+          </div>
+        </div>
+      </div>
+      <div class="col-6">
+        <div class="card">
+          <div class="row"><div class="kpi">预算执行</div><span class="badge" id="budgetBadge">—</span></div>
+          <div id="budgetSummary" class="small muted">设置预算后自动显示各分类对比</div>
+          <div class="spacer"></div>
+          <div class="row">
+            <button onclick="App.show('expenses')">去记账</button>
+            <button class="ghost" onclick="App.show('budget')">设置预算</button>
+          </div>
+        </div>
+      </div>
+      <div class="col-12">
+        <div class="card">
+          <div class="row">
+            <div>📌 快速导航：</div>
+            <div id="quickNav" class="row"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 行程 -->
+  <section id="itinerary" class="card" hidden>
+    <h2>📅 行程总览</h2>
+    <div class="grid">
+      <div class="col-12 card">
+        <div class="grid">
+          <div class="col-3">
+            <label>日期</label>
+            <input type="date" id="it_date">
+          </div>
+          <div class="col-3">
+            <label>开始时间</label>
+            <input type="time" id="it_start">
+          </div>
+          <div class="col-3">
+            <label>结束时间</label>
+            <input type="time" id="it_end">
+          </div>
+          <div class="col-3">
+            <label>时长（小时）</label>
+            <input type="number" id="it_hours" step="0.25" placeholder="如 2.5">
+          </div>
+          <div class="col-6">
+            <label>活动内容</label>
+            <input id="it_title" placeholder="如：十分老街 → 九份山城">
+          </div>
+          <div class="col-6">
+            <label>地点</label>
+            <input id="it_place" placeholder="如：九份、十分">
+          </div>
+          <div class="col-4">
+            <label>交通方式</label>
+            <select id="it_mode">
+              <option>包车</option><option>地铁</option><option>步行</option><option>飞机</option><option>高铁</option><option>游船</option><option>其他</option>
+            </select>
+          </div>
+          <div class="col-4">
+            <label>穿着建议</label>
+            <input id="it_wear" placeholder="防晒/雨具/舒适鞋...">
+          </div>
+          <div class="col-4">
+            <label>步行/交通时间</label>
+            <input id="it_walk" placeholder="捷运XX→XX，约15分钟">
+          </div>
+          <div class="col-12">
+            <label>评分/推荐 & 链接</label>
+            <input id="it_links" placeholder="Google评分、餐厅/景点/IG链接">
+          </div>
+          <div class="col-12">
+            <label>备注 / Plan B</label>
+            <textarea id="it_note" placeholder="室内替代活动、注意事项等"></textarea>
+          </div>
+          <div class="col-12 row">
+            <button onclick="UI.addItinerary()">添加行程</button>
+            <button class="ghost right" onclick="App.exportJSON()">导出备份</button>
+          </div>
+        </div>
+      </div>
+      <div class="col-12">
+        <table id="it_table">
+          <thead><tr><th>日期</th><th>时间</th><th>活动</th><th>地点/交通</th><th>穿着</th><th>备注</th><th></th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- 住宿 -->
+  <section id="lodging" class="card" hidden>
+    <h2>🏨 住宿信息</h2>
+    <div class="card">
+      <div class="grid">
+        <div class="col-3"><label>日期</label><input type="date" id="lo_date"></div>
+        <div class="col-5"><label>酒店/民宿名称</label><input id="lo_name"></div>
+        <div class="col-4"><label>房型</label><input id="lo_room"></div>
+        <div class="col-6"><label>地址</label><input id="lo_addr"></div>
+        <div class="col-3"><label>入住时间</label><input type="time" id="lo_in"></div>
+        <div class="col-3"><label>退房时间</label><input type="time" id="lo_out"></div>
+        <div class="col-6"><label>预订链接</label><input id="lo_link"></div>
+        <div class="col-3"><label>联系人/电话</label><input id="lo_contact"></div>
+        <div class="col-3"><label>房间分配</label><input id="lo_assign" placeholder="如：A房 2人，B房 3人"></div>
+        <div class="col-12"><label>特殊需求</label><textarea id="lo_note"></textarea></div>
+        <div class="col-12 row"><button onclick="UI.addLodging()">添加住宿</button></div>
+      </div>
+    </div>
+    <table id="lo_table"><thead><tr><th>日期</th><th>名称/房型</th><th>地址</th><th>时间</th><th>联系人</th><th>分配</th><th></th></tr></thead><tbody></tbody></table>
+  </section>
+
+  <!-- 交通 -->
+  <section id="transport" class="card" hidden>
+    <h2>🚗 交通安排</h2>
+    <div class="card">
+      <div class="grid">
+        <div class="col-3"><label>日期</label><input type="date" id="tr_date"></div>
+        <div class="col-3"><label>出发时间</label><input type="time" id="tr_out"></div>
+        <div class="col-3"><label>到达时间</label><input type="time" id="tr_in"></div>
+        <div class="col-3"><label>方式</label>
+          <select id="tr_mode"><option>飞机</option><option>包车</option><option>地铁</option><option>步行</option><option>高铁</option><option>游船</option><option>其他</option></select>
+        </div>
+        <div class="col-6"><label>集合点</label><input id="tr_meet"></div>
+        <div class="col-6"><label>司机/航班信息</label><input id="tr_info"></div>
+        <div class="col-6"><label>预订链接</label><input id="tr_link"></div>
+        <div class="col-6"><label>备注</label><input id="tr_note"></div>
+        <div class="col-12 row"><button onclick="UI.addTransport()">添加交通</button></div>
+      </div>
+    </div>
+    <table id="tr_table"><thead><tr><th>日期</th><th>时间</th><th>方式</th><th>集合点/信息</th><th>备注</th><th></th></tr></thead><tbody></tbody></table>
+  </section>
+
+  <!-- 携带物品 -->
+  <section id="packing" class="card" hidden>
+    <h2>👜 携带物品清单</h2>
+    <div class="card">
+      <div class="grid">
+        <div class="col-6"><label>物品名称</label><input id="pk_name"></div>
+        <div class="col-3"><label>分组</label><input id="pk_group" placeholder="证件/衣物/药品..."></div>
+        <div class="col-3"><label>备注</label><input id="pk_note"></div>
+        <div class="col-12 row"><button onclick="UI.addPack()">添加物品</button><button class="ghost" onclick="UI.loadDefaultPack()">加载预设清单</button></div>
+      </div>
+    </div>
+    <table id="pk_table"><thead><tr><th>状态</th><th>物品</th><th>分组</th><th>备注</th><th></th></tr></thead><tbody></tbody></table>
+  </section>
+
+  <!-- 记账 -->
+  <section id="expenses" class="card" hidden>
+    <h2>💰 团体记账 & 结算</h2>
+    <div class="card">
+      <div class="grid">
+        <div class="col-3"><label>日期</label><input type="date" id="ex_date"></div>
+        <div class="col-3"><label>金额</label><input type="number" id="ex_amount" step="0.01"></div>
+        <div class="col-3"><label>币种</label>
+          <select id="ex_ccy"><option>TWD</option><option>MYR</option></select>
+        </div>
+        <div class="col-3"><label>汇率（TWD↔MYR）</label><input type="number" id="ex_fx" step="0.0001" placeholder="手动填，如 0.14"></div>
+        <div class="col-6"><label>地点</label><input id="ex_place"></div>
+        <div class="col-6"><label>内容</label><input id="ex_desc"></div>
+        <div class="col-4"><label>付款人</label><input id="ex_payer" placeholder="从团队成员中选择，逗号分隔"></div>
+        <div class="col-4"><label>参与成员</label><input id="ex_participants" placeholder="逗号分隔，不填默认全员"></div>
+        <div class="col-4"><label>是否请客</label>
+          <select id="ex_treat"><option value="no">否</option><option value="yes">是</option></select>
+        </div>
+        <div class="col-6"><label>分类</label><input id="ex_cat" placeholder="餐饮/住宿/交通/购物/门票/其他"></div>
+        <div class="col-6"><label>付款方式</label><input id="ex_method" placeholder="现金/信用卡/支付宝/其他"></div>
+        <div class="col-12 row"><button onclick="UI.addExpense()">记录一笔</button><button class="ghost" onclick="UI.recalc()">重新统计</button><span class="right small muted">支持导出Excel（CSV）</span></div>
+      </div>
+    </div>
+    <div class="grid">
+      <div class="col-12">
+        <table id="ex_table"><thead><tr><th>日期</th><th>金额</th><th>币种</th><th>折算</th><th>地点/内容</th><th>参与</th><th>付款人</th><th>分类</th><th>方式</th><th></th></tr></thead><tbody></tbody></table>
+      </div>
+      <div class="col-12 card" id="settlement"></div>
+    </div>
+  </section>
+
+  <!-- 预算 -->
+  <section id="budget" class="card" hidden>
+    <h2>📊 预算对比</h2>
+    <div class="card">
+      <div class="grid" id="budgetForm">
+        <div class="col-3"><label>餐饮预算</label><input type="number" id="bd_food"></div>
+        <div class="col-3"><label>住宿预算</label><input type="number" id="bd_hotel"></div>
+        <div class="col-3"><label>交通预算</label><input type="number" id="bd_trans"></div>
+        <div class="col-3"><label>其他预算</label><input type="number" id="bd_other"></div>
+        <div class="col-12 row"><button onclick="UI.saveBudget()">保存预算</button></div>
+      </div>
+    </div>
+    <div id="budgetView" class="card small muted">填写预算后显示实际支出与对比。</div>
+  </section>
+
+  <!-- 团队与任务 -->
+  <section id="team" class="card" hidden>
+    <h2>👥 团队成员</h2>
+    <div class="card">
+      <div class="grid">
+        <div class="col-4"><label>姓名</label><input id="tm_name" placeholder="如：大哥"></div>
+        <div class="col-4"><label>职责</label><input id="tm_role" placeholder="司机/攻略/记账..."></div>
+        <div class="col-4"><label>联系方式（选填）</label><input id="tm_contact" placeholder="电话/微信"></div>
+        <div class="col-12 row"><button onclick="UI.addTeam()">添加成员</button><button class="ghost" onclick="UI.loadDefaultTeam()">加载10人示例</button></div>
+      </div>
+    </div>
+    <table id="tm_table"><thead><tr><th>姓名</th><th>职责</th><th>联系方式</th><th></th></tr></thead><tbody></tbody></table>
+
+    <h2>🗂️ 待办事项 / 分工</h2>
+    <div class="card">
+      <div class="grid">
+        <div class="col-6"><label>任务内容</label><input id="tk_title"></div>
+        <div class="col-3"><label>负责人</label><input id="tk_owner"></div>
+        <div class="col-3"><label>截止日期</label><input type="date" id="tk_due"></div>
+        <div class="col-3"><label>优先级</label><select id="tk_priority"><option>中</option><option>高</option><option>低</option></select></div>
+        <div class="col-9"><label>备注</label><input id="tk_note"></div>
+        <div class="col-12 row"><button onclick="UI.addTask()">添加任务</button></div>
+      </div>
+    </div>
+    <table id="tk_table"><thead><tr><th>状态</th><th>任务</th><th>负责人/截止</th><th>优先级</th><th>备注</th><th></th></tr></thead><tbody></tbody></table>
+  </section>
+
+  <!-- 联系人 -->
+  <section id="contacts" class="card" hidden>
+    <h2>📞 紧急联系人</h2>
+    <div class="card">
+      <div class="grid">
+        <div class="col-4"><label>名称</label><input id="ct_name"></div>
+        <div class="col-4"><label>电话</label><input id="ct_phone"></div>
+        <div class="col-4"><label>职责</label><input id="ct_role"></div>
+        <div class="col-12 row"><button onclick="UI.addContact()">添加</button><button class="ghost" onclick="UI.loadDefaultContacts()">加载台湾常用</button></div>
+      </div>
+    </div>
+    <table id="ct_table"><thead><tr><th>名称</th><th>电话</th><th>职责</th><th></th></tr></thead><tbody></tbody></table>
+  </section>
+
+  <!-- 回忆 -->
+  <section id="memories" class="card" hidden>
+    <h2>📷 旅行回忆</h2>
+    <div class="card">
+      <div class="grid">
+        <div class="col-3"><label>日期</label><input type="date" id="mm_date"></div>
+        <div class="col-9"><label>感想</label><input id="mm_note" placeholder="一句话记录"></div>
+        <div class="col-12"><label>照片链接（可贴Google Photos/IG链接）</label><input id="mm_url" placeholder="https://"></div>
+        <div class="col-12 row"><button onclick="UI.addMemory()">添加回忆</button></div>
+      </div>
+    </div>
+    <table id="mm_table"><thead><tr><th>日期</th><th>照片</th><th>感想</th><th></th></tr></thead><tbody></tbody></table>
+  </section>
+
+  <!-- 小贴士 -->
+  <section id="tips" class="card" hidden>
+    <h2>🧭 台北小贴士 & 返程清单</h2>
+    <div class="card small">
+      <p>捷运运营时间：06:00-24:00；夜市营业时间因地而异；便利店服务覆盖密集；悠游卡可在捷运站/便利店购买。</p>
+    </div>
+    <div class="card">
+      <div class="grid">
+        <div class="col-8"><label>返程检查事项</label><input id="tp_item" placeholder="如：证件、免税商品、纪念品..."></div>
+        <div class="col-4"><label>备注</label><input id="tp_note"></div>
+        <div class="col-12 row"><button onclick="UI.addTip()">添加</button></div>
+      </div>
+    </div>
+    <table id="tp_table"><thead><tr><th>状态</th><th>项目</th><th>备注</th><th></th></tr></thead><tbody></tbody></table>
+  </section>
+
+  <!-- 设置/备份 -->
+  <section id="settings" class="card" hidden>
+    <h2>⚙️ 设置 & 备份</h2>
+    <div class="card">
+      <div class="grid">
+        <div class="col-4"><label>旅行日期（开始）</label><input type="date" id="st_start"></div>
+        <div class="col-4"><label>旅行日期（结束）</label><input type="date" id="st_end"></div>
+        <div class="col-4"><label>目的地</label><input id="st_dest" value="台北"></div>
+        <div class="col-12 row">
+          <button onclick="App.saveTripInfo()">保存旅行信息</button>
+          <button class="ghost" onclick="App.exportJSON()">导出JSON备份</button>
+          <input type="file" id="importFile" accept="application/json" style="display:none" onchange="App.importJSON(event)">
+          <button class="ghost" onclick="document.getElementById('importFile').click()">导入JSON</button>
+        </div>
+      </div>
+    </div>
+    <div class="small muted">注：所有数据保存在本机浏览器（localStorage），不上传网络。换设备请导出后再导入。</div>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <div class="wrap">
+    <a href="#home" data-tab="home" class="pill active">🏠 首页</a>
+    <a href="#itinerary" data-tab="itinerary" class="pill">📅 行程</a>
+    <a href="#lodging" data-tab="lodging" class="pill">🏨 住宿</a>
+    <a href="#transport" data-tab="transport" class="pill">🚗 交通</a>
+    <a href="#packing" data-tab="packing" class="pill">👜 物品</a>
+    <a href="#expenses" data-tab="expenses" class="pill">💰 记账</a>
+    <a href="#budget" data-tab="budget" class="pill">📊 预算</a>
+    <a href="#team" data-tab="team" class="pill">👥 团队</a>
+    <a href="#contacts" data-tab="contacts" class="pill">📞 联系</a>
+    <a href="#memories" data-tab="memories" class="pill">📷 回忆</a>
+    <a href="#tips" data-tab="tips" class="pill">🧭 小贴士</a>
+    <a href="#settings" data-tab="settings" class="pill">⚙️ 设置</a>
+  </div>
+</footer>
+
+<script src="app.js"></script>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => navigator.serviceWorker.register('sw.js'));
+  }
+</script>
+</body>
+</html>
