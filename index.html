@@ -3,167 +3,247 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>台北8日行程 & 团体记账（离线可用）</title>
+  <title>台北行程 & 团体记账 v4（离线）</title>
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="assets/icon-192.png">
   <meta name="theme-color" content="#0ea5e9">
-  <meta name="description" content="个人使用的旅行行程与团体记账工具（离线可用 PWA）" />
   <style>
-    :root { --bg:#0b1220; --card:#111827; --muted:#94a3b8; --text:#e5e7eb; --brand:#0ea5e9; --ok:#10b981; --warn:#f59e0b; --danger:#ef4444; }
-    *{ box-sizing: border-box; }
+    :root{
+      --bg:#0b1220; --card:#111827; --muted:#94a3b8; --text:#e5e7eb; --brand:#0ea5e9;
+      --ok:#10b981; --warn:#f59e0b; --danger:#ef4444; --line:#334155; --input:#0b1020;
+    }
+    .light{
+      --bg:#f7f7fb; --card:#ffffff; --muted:#64748b; --text:#0f172a; --brand:#0ea5e9;
+      --ok:#10b981; --warn:#f59e0b; --danger:#ef4444; --line:#d0d7e2; --input:#f2f4f8;
+    }
+    *{ box-sizing:border-box; }
     html,body{ margin:0; padding:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, 'PingFang SC', 'Noto Sans CJK', 'Microsoft YaHei', Arial, sans-serif; background:var(--bg); color:var(--text); }
-    header{ position:sticky; top:0; z-index:10; backdrop-filter: blur(10px); background:rgba(11,18,32,.7); border-bottom:1px solid #1f2937; }
-    .wrap{ max-width:1100px; margin:0 auto; padding:0 16px; }
-    .nav{ display:flex; gap:8px; overflow:auto; padding:10px 0; }
-    .nav a{ white-space:nowrap; text-decoration:none; color:#cbd5e1; padding:8px 12px; border-radius:999px; border:1px solid #334155; }
+    header{ position:sticky; top:0; z-index:30; backdrop-filter: blur(10px); background:rgba(11,18,32,.7); border-bottom:1px solid var(--line); }
+    .light header{ background:rgba(255,255,255,.7); }
+    .wrap{ max-width:1200px; margin:0 auto; padding:0 16px; }
+    .nav{ display:flex; gap:8px; overflow:auto; padding:10px 0; align-items:center;}
+    .nav a{ white-space:nowrap; text-decoration:none; color:var(--text); padding:8px 12px; border-radius:999px; border:1px solid var(--line); }
     .nav a.active, .nav a:hover{ background:var(--brand); color:black; border-color:transparent; }
-    main{ padding:16px 0 100px; }
-    h2{ margin:24px 0 12px; display:flex; align-items:center; gap:8px; font-size:20px; }
-    .card{ background:var(--card); border:1px solid #1f2937; border-radius:16px; padding:16px; margin-bottom:16px; }
-    .grid{ display:grid; grid-template-columns: repeat(12, 1fr); gap:12px; }
-    .col-12{ grid-column: span 12; } .col-6{ grid-column: span 6; } .col-4{ grid-column: span 4; } .col-3{ grid-column: span 3; }
-    @media (max-width: 900px){ .col-6{ grid-column: span 12; } .col-4{ grid-column: span 12; } .col-3{ grid-column: span 6; } }
+    .spacer{ flex:1 1 auto; }
+    .theme{ border-radius:999px; padding:6px 10px; border:1px solid var(--line); background:transparent; color:var(--text); cursor:pointer;}
+    main{ padding:16px 0 60px; }
+    h2{ margin:20px 0 10px; display:flex; align-items:center; gap:8px; font-size:20px; }
+    .card{ background:var(--card); border:1px solid var(--line); border-radius:16px; padding:16px; margin-bottom:16px; }
+    .cards-grid{ display:grid; grid-template-columns: repeat(12, 1fr); gap:12px; }
+    .col-12{ grid-column: span 12; } .col-8{ grid-column: span 8; } .col-6{ grid-column: span 6; } .col-5{ grid-column: span 5; } .col-4{ grid-column: span 4; } .col-3{ grid-column: span 3; } .col-2{ grid-column: span 2; }
+    @media (max-width: 900px){ .col-8{ grid-column: span 12;} .col-6{ grid-column: span 12;} .col-5{ grid-column: span 12;} .col-4{ grid-column: span 12;} .col-3{ grid-column: span 6;} .col-2{ grid-column: span 6;} }
     label{ display:block; font-size:12px; color:var(--muted); margin-bottom:6px; }
-    input, select, textarea{ width:100%; padding:10px 12px; background:#0b1020; color:var(--text); border-radius:12px; border:1px solid #334155; }
+    input, select, textarea{ width:100%; padding:8px 10px; background:var(--input); color:var(--text); border-radius:10px; border:1px solid var(--line); }
+    input[type="checkbox"], input[type="radio"]{ width:auto; }
     textarea{ min-height:90px; resize:vertical; }
-    button{ cursor:pointer; border:none; background:var(--brand); color:black; padding:10px 14px; border-radius:12px; }
-    button.ghost{ background:transparent; color:#cbd5e1; border:1px solid #334155; }
+    button{ cursor:pointer; border:none; background:var(--brand); color:black; padding:8px 12px; border-radius:10px; }
+    button.ghost{ background:transparent; color:var(--text); border:1px solid var(--line); }
     table{ width:100%; border-collapse: collapse; }
-    th, td{ border-bottom:1px dashed #334155; padding:10px; text-align:left; vertical-align:top; }
+    th, td{ border-bottom:1px dashed var(--line); padding:8px; text-align:left; vertical-align:top; }
+    th{ font-size:13px; color:var(--muted); }
+    td{ font-size:14px; }
     .muted{ color:var(--muted); }
     .row{ display:flex; gap:8px; align-items:center; flex-wrap: wrap; }
-    .chip{ border:1px solid #334155; padding:6px 10px; border-radius:999px; font-size:12px; }
+    .chip{ border:1px solid var(--line); padding:4px 8px; border-radius:999px; font-size:12px; }
     .right{ margin-left:auto; }
     .danger{ background:var(--danger); color:white; }
     .ok{ background:var(--ok); color:black; }
     .warn{ background:var(--warn); color:black; }
-    .footer{ position:fixed; left:0; right:0; bottom:0; background:rgba(11,18,32,.9); border-top:1px solid #1f2937; }
-    .footer .wrap{ display:flex; gap:8px; padding:10px 16px; overflow:auto; }
-    .pill{ padding:8px 12px; border:1px solid #334155; border-radius:999px; display:flex; gap:8px; align-items:center; color:#cbd5e1; text-decoration:none; }
-    .pill.active{ background:var(--brand); color:black; border-color:transparent; }
-    .badge{ font-size:12px; padding:2px 6px; border-radius:6px; background:#0b1020; border:1px solid #334155; color:#cbd5e1; }
-    .kpi{ font-weight:700; font-size:20px; }
-    .spacer{ height:8px; }
-    .hl{ color:#22d3ee; }
+    .badge{ font-size:12px; padding:2px 6px; border-radius:6px; background:var(--input); border:1px solid var(--line); color:var(--text); }
+    .kpi{ font-weight:700; font-size:18px; }
+    .big{ font-size:18px; font-weight:600;}
     .small{ font-size:12px; }
-  </style>
+    .thumb{ width:40px; height:40px; object-fit:cover; border-radius:6px; border:1px solid var(--line); cursor:pointer; }
+    .viewer{ position:fixed; inset:0; background:rgba(0,0,0,.8); display:none; align-items:center; justify-content:center; z-index:50; }
+    .viewer img{ max-width:90vw; max-height:90vh; border-radius:12px; border:1px solid var(--line); }
+    .calendar{ user-select:none; }
+    .cal-head{ display:flex; align-items:center; gap:8px; }
+    .cal-grid{ display:grid; grid-template-columns: repeat(7, 1fr); gap:4px; }
+    .cal-cell{ text-align:center; padding:6px 0; border-radius:8px; border:1px solid var(--line); background:var(--input); cursor:pointer; position:relative;}
+    .cal-cell .dot{ position:absolute; bottom:4px; left:50%; transform:translateX(-50%); width:6px; height:6px; border-radius:999px; background:var(--brand); }
+    .cal-cell.active{ outline:2px solid var(--brand); background:rgba(14,165,233,.15); }
+    .dropzone{ padding:6px 10px; background:rgba(14,165,233,.08); border:1px dashed var(--line); border-radius:10px; margin:6px 0; }
+    .flight{ display:flex; gap:12px; align-items:flex-start; }
+    .plane{ font-size:28px; line-height:1; }
+    .countdown{ font-weight:700; }
+    .sticky-foot{ position:sticky; bottom:0; background:var(--card); border-top:1px solid var(--line); padding:6px 8px; z-index:5; }
+    .pill{ padding:2px 8px; border-radius:999px; border:1px solid var(--line); }
+    canvas{ width:100%; height:280px; }
+  
+  input[type="date"], input[type="time"], select, textarea{ color-scheme:dark; }
+  body.light input[type="date"], body.light input[type="time"], body.light select, body.light textarea{ color-scheme:light; }
+  ::placeholder{ color: var(--muted); }
+  @media (max-width:640px){ table.compact td, table.compact th{ padding:6px 8px; } .chip{ margin:4px 4px 0 0; } }
+    
+/* v4.3.7 fixes */
+#miniCalendar .mini-header{display:flex;justify-content:space-between;align-items:center;margin:2px 0 4px;color:var(--muted)}
+#miniCalendar .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+#miniCalendar .cal-cell{padding:6px 0;border:1px solid var(--line);border-radius:8px;text-align:center;cursor:pointer;position:relative}
+#miniCalendar .cal-cell.active{outline:2px solid var(--brand)}
+#miniCalendar .cal-cell .dot{position:absolute;bottom:3px;left:50%;transform:translateX(-50%);width:6px;height:6px;border-radius:50%;background:var(--brand)}
+#recentIt .card{padding:6px 10px} #recentIt .row{margin:2px 0!important}
+#itinerary .dropzone{font-size:12px;opacity:.55;padding:6px;border-style:dashed}
+    #lodging input#lo_name{width:100%}
+    /* Ensure lodging name field remains full width on H5 */
+    #lodging #lo_name{width:100%}
+    #lodging .cards-grid{grid-template-columns: repeat(12, 1fr);}
+    #lodging .col-5:has(#lo_name){grid-column: span 8;}
+    @media (max-width: 900px){
+      #lodging .col-5:has(#lo_name){grid-column: span 12;}
+    }
+#chartCat, #chartPeople{display:none!important} /* 直接隐藏图表 */
+nav a[href="#memories"]{display:none!important}
+
+</style>
+  <link rel="stylesheet" href="patch.css">
+<style>
+/* v4.3.7 injected: responsive mini calendar on Home + wide telegram inputs + hide Memories nav */
+:root{
+  --mini-cal-gap: 6px;
+  --mini-cal-cell: 36px;
+}
+/* Ensure Home mini calendar styles override external patch.css */
+#home #miniCalendar .mini-header{display:flex;justify-content:space-between;align-items:center;margin:2px 0 4px;color:var(--muted)}
+#home #miniCalendar .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+#home #miniCalendar .cal-cell{padding:6px 0;border:1px solid var(--line);border-radius:8px;text-align:center;cursor:pointer;position:relative}
+#home #miniCalendar .cal-cell.active{outline:2px solid var(--brand)}
+#home #miniCalendar .cal-cell .dot{position:absolute;bottom:3px;left:50%;transform:translateX(-50%);width:6px;height:6px;border-radius:50%;background:var(--brand)}
+@media (max-width: 600px){
+  #home #miniCalendar {padding: 8px 10px;}
+  #home #miniCalendar .mini-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+  #home #miniCalendar .cal-grid{
+    display:grid;
+    grid-template-columns: repeat(7,1fr);
+    gap: var(--mini-cal-gap);
+  }
+  #home #miniCalendar .cal-cell{
+    height: var(--mini-cal-cell);
+    display:flex;align-items:center;justify-content:center;
+    border:1px solid var(--line, rgba(255,255,255,.08));
+    border-radius:10px;
+    font-size:14px;
+    user-select:none;
+  }
+  #home #miniCalendar .cal-cell.today{outline:2px solid #4db4ff; box-shadow:0 0 0 3px rgba(77,180,255,.15) inset;}
+  #home #miniCalendar .cal-cell.has{background:rgba(77,180,255,.12);}
+}
+
+/* Make Telegram inputs wider & in a row */
+#settings .tg-row{display:flex; gap:12px; margin-top:8px; flex-wrap:wrap;}
+#settings .tg-row .tg-field{flex:1 1 280px; min-width:260px;}
+#settings .tg-row .tg-field input{width:100%;}
+/* Hide '回忆' nav if still present */
+a[href*="#memories"], #memories { display:none !important; }
+
+  /* H5: itinerary item actions (修改/删除) stacked at right */
+  @media (max-width: 640px){
+    #it_groups .card > .row:has(button._edit):has(button[onclick^="UI.delItemByIndex("]){
+      display:grid;
+      grid-template-columns: 1fr auto;
+      align-items:flex-start;
+      gap:6px;
+    }
+    #it_groups .card > .row:has(button._edit):has(button[onclick^="UI.delItemByIndex("]) button.ghost{
+      grid-column:2;
+      justify-self:end;
+      width:auto;
+      min-width:66px;
+    }
+    #it_groups .card > .row:has(button._edit):has(button[onclick^="UI.delItemByIndex("]) button.ghost._edit{ margin-bottom:6px; }
+    #it_groups .card > .action-row{ display:grid; grid-template-columns: 1fr auto; gap:6px; align-items:center; }
+    #it_groups .card > .action-row button.ghost{ grid-column:2; justify-self:end; }
+    #it_groups .card > .action-row button.ghost.move{ margin-bottom:6px; }
+  }
+</style>
 </head>
 <body>
 <header>
   <div class="wrap">
     <div class="nav" id="nav"></div>
+    <div class="nav">
+      <div class="spacer"></div>
+      <button id="themeBtn" class="theme" title="切换主题">🌙/☀️</button>
+    </div>
   </div>
-</header>
+<div style="position:fixed;right:16px;bottom:12px;z-index:99;font-size:12px;color:#94a3b8">v4.3.7</div></header>
 
 <main class="wrap">
+
+  <!-- 首页 -->
   <section id="home" class="card">
-    <h2>🏠 首页 & 使用说明</h2>
-    <div class="grid">
-      <div class="col-6">
-        <div class="card">
-          <div class="row"><div class="kpi">团队</div><span class="badge" id="teamCount">0 人</span><span class="right small muted" id="tripDates"></span></div>
-          <div class="spacer"></div>
-          <div class="row">
-            <button onclick="App.show('team')">管理团队成员</button>
-            <button class="ghost" onclick="App.show('tasks')">待办 / 分工</button>
-            <span class="right small muted">变更日志自动记录</span>
-          </div>
-        </div>
-      </div>
-      <div class="col-6">
-        <div class="card">
-          <div class="row"><div class="kpi">预算执行</div><span class="badge" id="budgetBadge">—</span></div>
-          <div id="budgetSummary" class="small muted">设置预算后自动显示各分类对比</div>
-          <div class="spacer"></div>
-          <div class="row">
-            <button onclick="App.show('expenses')">去记账</button>
-            <button class="ghost" onclick="App.show('budget')">设置预算</button>
-          </div>
-        </div>
-      </div>
-      <div class="col-12">
+    <h2>🏠 首页</h2>
+    <div class="cards-grid">
+      <div class="col-8">
         <div class="card">
           <div class="row">
-            <div>📌 快速导航：</div>
-            <div id="quickNav" class="row"></div>
+            <div class="kpi">旅行信息</div>
+            <span class="badge" id="teamCount">0 人</span>
+            <span class="right big" id="tripDates"></span>
+          </div>
+          <div class="cards-grid" style="margin-top:8px;">
+            <div class="col-4"><label>旅行开始</label><input type="date" id="st_start"></div>
+            <div class="col-4"><label>旅行结束</label><input type="date" id="st_end"></div>
+            <div class="col-4"><label>目的地</label><input id="st_dest" value="台北"></div>
+            <div class="col-12 row"><button onclick="App.saveTripInfo()">保存旅行信息</button></div>
           </div>
         </div>
+        <div class="card" id="homeFlights">
+          <div class="row"><div class="kpi">🛫 航班</div><span class="right small muted"><a href="#transport" onclick="App.show('transport')">去添加</a></span></div>
+          <div id="flightList" class="small muted">没有“飞行”交通记录。</div>
+        </div>
       </div>
+      <div class="col-4">
+        <div class="card">
+          <div class="row"><div class="kpi">📅 小日历</div><span class="right small muted"><a href="#itinerary" onclick="App.show('itinerary')">管理行程</a></span></div>
+          <div id="miniCalendar" class="calendar"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="row"><div class="kpi">最近行程</div><span class="right small muted"><a href="#itinerary" onclick="App.show('itinerary')">去添加</a></span></div>
+      <div id="recentIt">还没有行程，先去添加吧。</div>
     </div>
   </section>
 
   <!-- 行程 -->
   <section id="itinerary" class="card" hidden>
-    <h2>📅 行程总览</h2>
-    <div class="grid">
-      <div class="col-12 card">
-        <div class="grid">
-          <div class="col-3">
-            <label>日期</label>
-            <input type="date" id="it_date">
-          </div>
-          <div class="col-3">
-            <label>开始时间</label>
-            <input type="time" id="it_start">
-          </div>
-          <div class="col-3">
-            <label>结束时间</label>
-            <input type="time" id="it_end">
-          </div>
-          <div class="col-3">
-            <label>时长（小时）</label>
-            <input type="number" id="it_hours" step="0.25" placeholder="如 2.5">
-          </div>
-          <div class="col-6">
-            <label>活动内容</label>
-            <input id="it_title" placeholder="如：十分老街 → 九份山城">
-          </div>
-          <div class="col-6">
-            <label>地点</label>
-            <input id="it_place" placeholder="如：九份、十分">
-          </div>
-          <div class="col-4">
-            <label>交通方式</label>
-            <select id="it_mode">
-              <option>包车</option><option>地铁</option><option>步行</option><option>飞机</option><option>高铁</option><option>游船</option><option>其他</option>
-            </select>
-          </div>
-          <div class="col-4">
-            <label>穿着建议</label>
-            <input id="it_wear" placeholder="防晒/雨具/舒适鞋...">
-          </div>
-          <div class="col-4">
-            <label>步行/交通时间</label>
-            <input id="it_walk" placeholder="捷运XX→XX，约15分钟">
-          </div>
-          <div class="col-12">
-            <label>评分/推荐 & 链接</label>
-            <input id="it_links" placeholder="Google评分、餐厅/景点/IG链接">
-          </div>
-          <div class="col-12">
-            <label>备注 / Plan B</label>
-            <textarea id="it_note" placeholder="室内替代活动、注意事项等"></textarea>
-          </div>
-          <div class="col-12 row">
-            <button onclick="UI.addItinerary()">添加行程</button>
-            <button class="ghost right" onclick="App.exportJSON()">导出备份</button>
-          </div>
+    <h2>📅 行程（分组 + 拖拽）</h2>
+    <div class="card">
+      <div class="cards-grid">
+        <div class="col-3"><label>日期</label><input type="date" id="it_date"></div>
+        <div class="col-3"><label>开始时间</label><input type="time" id="it_start"></div>
+        <div class="col-3"><label>结束时间</label><input type="time" id="it_end"></div>
+        <div class="col-3"><label>时长（小时）</label><input type="number" id="it_hours" step="0.25" placeholder="如 2.5"></div>
+        <div class="col-6"><label>活动内容</label><input id="it_title" placeholder="如：十分老街 → 九份山城"></div>
+        <div class="col-6"><label>地点</label><input id="it_place" placeholder="如：九份、十分"></div>
+        <div class="col-4"><label>交通方式</label>
+          <select id="it_mode"><option>包车</option><option>地铁</option><option>步行</option><option>飞机</option><option>飞行</option><option>高铁</option><option>游船</option><option>其他</option></select>
+        </div>
+        <div class="col-4"><label>穿着建议</label><input id="it_wear" placeholder="防晒/雨具/舒适鞋..."></div>
+        <div class="col-4"><label>步行/交通时间</label><input id="it_walk" placeholder="捷运XX→XX，约15分钟"></div>
+        <div class="col-12"><label>评分/推荐 & 链接</label><input id="it_links" placeholder="Google评分、餐厅/景点/IG链接"></div>
+        <div class="col-12"><label>备注 / Plan B</label><textarea id="it_note" placeholder="室内替代活动、注意事项等"></textarea></div>
+        <div class="col-12 row">
+          <button onclick="UI.addItinerary()">添加行程</button>
+          <button class="ghost right" onclick="App.exportJSON()">导出备份</button>
         </div>
       </div>
-      <div class="col-12">
-        <table id="it_table">
-          <thead><tr><th>日期</th><th>时间</th><th>活动</th><th>地点/交通</th><th>穿着</th><th>备注</th><th></th></tr></thead>
-          <tbody></tbody>
-        </table>
-      </div>
     </div>
+
+    <div class="card">
+      <div class="row"><div class="kpi">📆 小日历</div></div>
+      <div id="itCalendar" class="calendar"></div>
+    </div>
+
+    <div id="it_groups"></div>
   </section>
 
   <!-- 住宿 -->
   <section id="lodging" class="card" hidden>
     <h2>🏨 住宿信息</h2>
     <div class="card">
-      <div class="grid">
+      <div class="cards-grid">
         <div class="col-3"><label>日期</label><input type="date" id="lo_date"></div>
         <div class="col-5"><label>酒店/民宿名称</label><input id="lo_name"></div>
         <div class="col-4"><label>房型</label><input id="lo_room"></div>
@@ -184,13 +264,16 @@
   <section id="transport" class="card" hidden>
     <h2>🚗 交通安排</h2>
     <div class="card">
-      <div class="grid">
+      <div class="cards-grid">
         <div class="col-3"><label>日期</label><input type="date" id="tr_date"></div>
         <div class="col-3"><label>出发时间</label><input type="time" id="tr_out"></div>
         <div class="col-3"><label>到达时间</label><input type="time" id="tr_in"></div>
         <div class="col-3"><label>方式</label>
-          <select id="tr_mode"><option>飞机</option><option>包车</option><option>地铁</option><option>步行</option><option>高铁</option><option>游船</option><option>其他</option></select>
+          <select id="tr_mode"><option>飞机</option><option>飞行</option><option>包车</option><option>地铁</option><option>步行</option><option>高铁</option><option>游船</option><option>其他</option></select>
         </div>
+        <div class="col-4"><label>航班号（飞行时填写）</label><input id="tr_flight"></div>
+        <div class="col-4"><label>起飞机场</label><input id="tr_from"></div>
+        <div class="col-4"><label>降落机场</label><input id="tr_to"></div>
         <div class="col-6"><label>集合点</label><input id="tr_meet"></div>
         <div class="col-6"><label>司机/航班信息</label><input id="tr_info"></div>
         <div class="col-6"><label>预订链接</label><input id="tr_link"></div>
@@ -198,101 +281,84 @@
         <div class="col-12 row"><button onclick="UI.addTransport()">添加交通</button></div>
       </div>
     </div>
-    <table id="tr_table"><thead><tr><th>日期</th><th>时间</th><th>方式</th><th>集合点/信息</th><th>备注</th><th></th></tr></thead><tbody></tbody></table>
+    <table id="tr_table"><thead><tr><th>日期</th><th>时间</th><th>方式</th><th>航班/机场</th><th>集合点/信息</th><th>备注</th><th></th></tr></thead><tbody></tbody></table>
   </section>
 
-  <!-- 携带物品 -->
+  <!-- 携带物品（分组折叠+可改分组） -->
   <section id="packing" class="card" hidden>
     <h2>👜 携带物品清单</h2>
     <div class="card">
-      <div class="grid">
+      <div class="cards-grid">
         <div class="col-6"><label>物品名称</label><input id="pk_name"></div>
         <div class="col-3"><label>分组</label><input id="pk_group" placeholder="证件/衣物/药品..."></div>
         <div class="col-3"><label>备注</label><input id="pk_note"></div>
         <div class="col-12 row"><button onclick="UI.addPack()">添加物品</button><button class="ghost" onclick="UI.loadDefaultPack()">加载预设清单</button></div>
       </div>
     </div>
-    <table id="pk_table"><thead><tr><th>状态</th><th>物品</th><th>分组</th><th>备注</th><th></th></tr></thead><tbody></tbody></table>
+    <div id="pk_groups"></div>
   </section>
 
   <!-- 记账 -->
   <section id="expenses" class="card" hidden>
     <h2>💰 团体记账 & 结算</h2>
     <div class="card">
-      <div class="grid">
+      <div class="cards-grid">
         <div class="col-3"><label>日期</label><input type="date" id="ex_date"></div>
+        <div class="col-3"><label>时间</label><input type="time" id="ex_time"></div>
         <div class="col-3"><label>金额</label><input type="number" id="ex_amount" step="0.01"></div>
-        <div class="col-3"><label>币种</label>
-          <select id="ex_ccy"><option>TWD</option><option>MYR</option></select>
-        </div>
-        <div class="col-3"><label>汇率（TWD↔MYR）</label><input type="number" id="ex_fx" step="0.0001" placeholder="手动填，如 0.14"></div>
+        <div class="col-3"><label>币种</label><select id="ex_ccy"><option>MYR</option><option>TWD</option></select></div>
+        <div class="col-3"><label>汇率（TWD→MYR）</label><input type="number" id="ex_fx" step="0.0001" placeholder="TWD转MYR汇率"></div>
         <div class="col-6"><label>地点</label><input id="ex_place"></div>
         <div class="col-6"><label>内容</label><input id="ex_desc"></div>
-        <div class="col-4"><label>付款人</label><input id="ex_payer" placeholder="从团队成员中选择，逗号分隔"></div>
-        <div class="col-4"><label>参与成员</label><input id="ex_participants" placeholder="逗号分隔，不填默认全员"></div>
-        <div class="col-4"><label>是否请客</label>
-          <select id="ex_treat"><option value="no">否</option><option value="yes">是</option></select>
+        <div class="col-4"><label>付款人</label><select id="ex_payer"></select></div>
+        <div class="col-8"><label>参与成员</label>
+          <div class="row" id="ex_participants"></div>
+          <div class="row small"><button class="ghost" onclick="UI.participantsSelectAll(true)">全选</button><button class="ghost" onclick="UI.participantsSelectAll(false)">全不选</button></div>
         </div>
-        <div class="col-6"><label>分类</label><input id="ex_cat" placeholder="餐饮/住宿/交通/购物/门票/其他"></div>
-        <div class="col-6"><label>付款方式</label><input id="ex_method" placeholder="现金/信用卡/支付宝/其他"></div>
-        <div class="col-12 row"><button onclick="UI.addExpense()">记录一笔</button><button class="ghost" onclick="UI.recalc()">重新统计</button><span class="right small muted">支持导出Excel（CSV）</span></div>
+        <div class="col-4"><label>是否请客</label><select id="ex_treat"><option value="no">否</option><option value="yes">是</option></select></div>
+        <div class="col-4"><label>分类</label>
+          <select id="ex_cat"><option>餐饮</option><option>住宿</option><option>交通</option><option>购物</option><option>景点</option><option>其他</option></select>
+        </div>
+        <div class="col-4"><label>其他分类（当上面选“其他”时）</label><input id="ex_cat_other" placeholder="自定义分类" disabled></div>
+        <div class="col-4"><label>付款方式</label><input id="ex_method" placeholder="现金/信用卡/支付宝/其他"></div>
+        <div class="col-6"><label>账单图片</label><input type="file" id="ex_bill" accept="image/*"></div>
+        <div class="col-12 row"><button onclick="UI.addExpense()">记录一笔</button><button class="ghost" onclick="UI.recalc()">重新统计</button><button class="ghost" onclick="UI.exportCSV()">导出CSV</button></div>
       </div>
     </div>
-    <div class="grid">
+    <div class="cards-grid">
       <div class="col-12">
-        <table id="ex_table"><thead><tr><th>日期</th><th>金额</th><th>币种</th><th>折算</th><th>地点/内容</th><th>参与</th><th>付款人</th><th>分类</th><th>方式</th><th></th></tr></thead><tbody></tbody></table>
+        <table id="ex_table"><thead><tr><th>日期</th><th>金额(MYR)</th><th>原币</th><th>地点/内容</th><th>参与</th><th>付款人</th><th>分类</th><th>方式</th><th>票据</th><th></th></tr></thead><tbody></tbody></table>
       </div>
       <div class="col-12 card" id="settlement"></div>
-    </div>
-  </section>
-
-  <!-- 预算 -->
-  <section id="budget" class="card" hidden>
-    <h2>📊 预算对比</h2>
-    <div class="card">
-      <div class="grid" id="budgetForm">
-        <div class="col-3"><label>餐饮预算</label><input type="number" id="bd_food"></div>
-        <div class="col-3"><label>住宿预算</label><input type="number" id="bd_hotel"></div>
-        <div class="col-3"><label>交通预算</label><input type="number" id="bd_trans"></div>
-        <div class="col-3"><label>其他预算</label><input type="number" id="bd_other"></div>
-        <div class="col-12 row"><button onclick="UI.saveBudget()">保存预算</button></div>
+      <div class="col-6 card">
+        <h3>支出分类图</h3>
+        <canvas id="chartCat"></canvas>
+      </div>
+      <div class="col-6 card">
+        <h3>按人结算图</h3>
+        <canvas id="chartPeople"></canvas>
       </div>
     </div>
-    <div id="budgetView" class="card small muted">填写预算后显示实际支出与对比。</div>
   </section>
 
   <!-- 团队与任务 -->
   <section id="team" class="card" hidden>
     <h2>👥 团队成员</h2>
     <div class="card">
-      <div class="grid">
-        <div class="col-4"><label>姓名</label><input id="tm_name" placeholder="如：大哥"></div>
-        <div class="col-4"><label>职责</label><input id="tm_role" placeholder="司机/攻略/记账..."></div>
-        <div class="col-4"><label>联系方式（选填）</label><input id="tm_contact" placeholder="电话/微信"></div>
+      <div class="cards-grid">
+        <div class="col-6"><label>姓名</label><input id="tm_name" placeholder="如：大哥"></div>
+        <div class="col-6"><label>联系方式（选填）</label><input id="tm_contact" placeholder="电话/微信"></div>
         <div class="col-12 row"><button onclick="UI.addTeam()">添加成员</button><button class="ghost" onclick="UI.loadDefaultTeam()">加载10人示例</button></div>
       </div>
     </div>
-    <table id="tm_table"><thead><tr><th>姓名</th><th>职责</th><th>联系方式</th><th></th></tr></thead><tbody></tbody></table>
-
-    <h2>🗂️ 待办事项 / 分工</h2>
-    <div class="card">
-      <div class="grid">
-        <div class="col-6"><label>任务内容</label><input id="tk_title"></div>
-        <div class="col-3"><label>负责人</label><input id="tk_owner"></div>
-        <div class="col-3"><label>截止日期</label><input type="date" id="tk_due"></div>
-        <div class="col-3"><label>优先级</label><select id="tk_priority"><option>中</option><option>高</option><option>低</option></select></div>
-        <div class="col-9"><label>备注</label><input id="tk_note"></div>
-        <div class="col-12 row"><button onclick="UI.addTask()">添加任务</button></div>
-      </div>
-    </div>
-    <table id="tk_table"><thead><tr><th>状态</th><th>任务</th><th>负责人/截止</th><th>优先级</th><th>备注</th><th></th></tr></thead><tbody></tbody></table>
+    <table id="tm_table"><thead><tr><th>姓名</th><th>联系方式</th><th></th></tr></thead><tbody></tbody></table>
   </section>
 
   <!-- 联系人 -->
   <section id="contacts" class="card" hidden>
     <h2>📞 紧急联系人</h2>
     <div class="card">
-      <div class="grid">
+      <div class="cards-grid">
         <div class="col-4"><label>名称</label><input id="ct_name"></div>
         <div class="col-4"><label>电话</label><input id="ct_phone"></div>
         <div class="col-4"><label>职责</label><input id="ct_role"></div>
@@ -306,7 +372,7 @@
   <section id="memories" class="card" hidden>
     <h2>📷 旅行回忆</h2>
     <div class="card">
-      <div class="grid">
+      <div class="cards-grid">
         <div class="col-3"><label>日期</label><input type="date" id="mm_date"></div>
         <div class="col-9"><label>感想</label><input id="mm_note" placeholder="一句话记录"></div>
         <div class="col-12"><label>照片链接（可贴Google Photos/IG链接）</label><input id="mm_url" placeholder="https://"></div>
@@ -316,65 +382,74 @@
     <table id="mm_table"><thead><tr><th>日期</th><th>照片</th><th>感想</th><th></th></tr></thead><tbody></tbody></table>
   </section>
 
-  <!-- 小贴士 -->
-  <section id="tips" class="card" hidden>
-    <h2>🧭 台北小贴士 & 返程清单</h2>
-    <div class="card small">
-      <p>捷运运营时间：06:00-24:00；夜市营业时间因地而异；便利店服务覆盖密集；悠游卡可在捷运站/便利店购买。</p>
-    </div>
-    <div class="card">
-      <div class="grid">
-        <div class="col-8"><label>返程检查事项</label><input id="tp_item" placeholder="如：证件、免税商品、纪念品..."></div>
-        <div class="col-4"><label>备注</label><input id="tp_note"></div>
-        <div class="col-12 row"><button onclick="UI.addTip()">添加</button></div>
-      </div>
-    </div>
-    <table id="tp_table"><thead><tr><th>状态</th><th>项目</th><th>备注</th><th></th></tr></thead><tbody></tbody></table>
-  </section>
-
   <!-- 设置/备份 -->
   <section id="settings" class="card" hidden>
-    <h2>⚙️ 设置 & 备份</h2>
+    <h2>⚙️ 设置 / 备份</h2>
     <div class="card">
-      <div class="grid">
-        <div class="col-4"><label>旅行日期（开始）</label><input type="date" id="st_start"></div>
-        <div class="col-4"><label>旅行日期（结束）</label><input type="date" id="st_end"></div>
-        <div class="col-4"><label>目的地</label><input id="st_dest" value="台北"></div>
-        <div class="col-12 row">
-          <button onclick="App.saveTripInfo()">保存旅行信息</button>
-          <button class="ghost" onclick="App.exportJSON()">导出JSON备份</button>
-          <input type="file" id="importFile" accept="application/json" style="display:none" onchange="App.importJSON(event)">
-          <button class="ghost" onclick="document.getElementById('importFile').click()">导入JSON</button>
-        </div>
+      <div class="cards-grid">
+        <div class="col-4"><label>机场提醒（起飞前X小时）</label><input type="number" id="set_flight_alert" min="1" step="1"></div>
+        <div class="col-8 row" style="align-items:flex-end;"><button onclick="UI.saveSettings()">保存设置</button></div>
       </div>
     </div>
-    <div class="small muted">注：所有数据保存在本机浏览器（localStorage），不上传网络。换设备请导出后再导入。</div>
+
+    <div class="card">
+      <div class="row">
+        <button onclick="App.exportJSON()">导出JSON备份</button>
+        <input type="file" id="importFile" accept="application/json" style="display:none" onchange="App.importJSON(event)">
+        <button class="ghost" onclick="document.getElementById('importFile').click()">导入JSON</button>
+      </div>
+    </div>
+    <div class="small muted">注：数据保存在本机（localStorage），不上传网络。</div>
   </section>
 
 </main>
 
-<footer class="footer">
-  <div class="wrap">
-    <a href="#home" data-tab="home" class="pill active">🏠 首页</a>
-    <a href="#itinerary" data-tab="itinerary" class="pill">📅 行程</a>
-    <a href="#lodging" data-tab="lodging" class="pill">🏨 住宿</a>
-    <a href="#transport" data-tab="transport" class="pill">🚗 交通</a>
-    <a href="#packing" data-tab="packing" class="pill">👜 物品</a>
-    <a href="#expenses" data-tab="expenses" class="pill">💰 记账</a>
-    <a href="#budget" data-tab="budget" class="pill">📊 预算</a>
-    <a href="#team" data-tab="team" class="pill">👥 团队</a>
-    <a href="#contacts" data-tab="contacts" class="pill">📞 联系</a>
-    <a href="#memories" data-tab="memories" class="pill">📷 回忆</a>
-    <a href="#tips" data-tab="tips" class="pill">🧭 小贴士</a>
-    <a href="#settings" data-tab="settings" class="pill">⚙️ 设置</a>
-  </div>
-</footer>
+<!-- 大图查看 -->
+<div id="imgViewer" class="viewer" onclick="this.style.display='none'">
+  <img id="imgView" alt="票据预览">
+</div>
 
 <script src="app.js"></script>
+<script src="patch.js"></script>
 <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => navigator.serviceWorker.register('sw.js'));
   }
+</script>
+<script>
+/* v4.3.7 injected helpers */
+(function(){
+  function qs(s, r){ return (r||document).querySelector(s); }
+  function qsa(s, r){ return Array.from((r||document).querySelectorAll(s)); }
+
+  // (removed) HOME mini-calendar auto DOM injection to avoid double headers and layout conflicts
+
+  // SETTINGS: widen telelgram inputs
+  try{
+    var settings = qs('#settings');
+    if(settings && !qs('.tg-row', settings)){
+      var tokenInput = qsa('#settings input').find(x=>(x.previousElementSibling && /Bot Token/i.test(x.previousElementSibling.textContent))) || null;
+      var chatInput  = qsa('#settings input').find(x=>(x.previousElementSibling && /Chat ID/i.test(x.previousElementSibling.textContent))) || null;
+      if(tokenInput){
+        var wrap = document.createElement('div'); wrap.className='tg-row';
+        var fx1 = document.createElement('div'); fx1.className='tg-field';
+        var fx2 = document.createElement('div'); fx2.className='tg-field';
+        tokenInput.parentElement.insertBefore(wrap, tokenInput.parentElement.firstChild);
+        fx1.appendChild(tokenInput);
+        wrap.appendChild(fx1);
+        if(chatInput){
+          fx2.appendChild(chatInput);
+          wrap.appendChild(fx2);
+        }
+      }
+    }
+  }catch(e){ console.warn('[v437] settings patch fail', e); }
+
+  // NAV: remove memories tab if still present
+  qsa('nav a, .tabs a, .navbar a').forEach(function(a){
+    if(/回忆/.test(a.textContent)){ a.remove(); }
+  });
+})();
 </script>
 </body>
 </html>

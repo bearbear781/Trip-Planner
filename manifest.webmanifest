@@ -1,6 +1,6 @@
 {
-  "name": "台北8日行程 & 团体记账（离线可用）",
-  "short_name": "台北行程记账",
+  "name": "台北行程 & 团体记账 v4（离线）",
+  "short_name": "台北行程 v4",
   "start_url": ".",
   "display": "standalone",
   "background_color": "#0b1220",

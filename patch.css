@@ -1,0 +1,33 @@
+/* --- Patch v4.3.6 CSS --- */
+
+/* Home: mini calendar mobile fix */
+#miniCalendar .mini-header{display:flex;justify-content:space-between;align-items:center;margin:4px 0 8px;opacity:.85}
+#miniCalendar .cal-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+#miniCalendar .cal-cell{display:flex;align-items:center;justify-content:center;height:38px;line-height:1;border:1px solid var(--line,#2c3644);border-radius:8px;text-align:center;cursor:pointer;position:relative}
+#miniCalendar .cal-cell.active{outline:2px solid var(--brand,#5eead4)}
+#miniCalendar .cal-cell .dot{position:absolute;bottom:4px;left:50%;transform:translateX(-50%);width:6px;height:6px;border-radius:50%;background:var(--brand,#5eead4)}
+@media (max-width:640px){
+  #miniCalendar .cal-grid{gap:5px}
+  #miniCalendar .cal-cell{height:34px;border-radius:6px;font-size:12px}
+}
+
+/* Expense table: make horizontally scrollable on small screens */
+#ex_table_wrap{overflow-x:auto; display:block}
+#ex_table{min-width: 900px; border-collapse:collapse}
+#ex_table th, #ex_table td{white-space:nowrap}
+
+/* Hide charts and containers entirely */
+#chartCat, #chartPeople, #chartCatWrap, #chartPeopleWrap, .charts, .chart-card{display:none!important}
+/* Also hide cards whose title text equals 支出分类图 / 按人结算图 */
+.card[data-hide="charts"]{display:none!important}
+
+/* Hide Memories tab/section robust */
+nav a, .tabs a { }
+nav a._hide_mem, .tabs a._hide_mem { display:none!important }
+section#memories{display:none!important}
+
+/* Telegram inputs width */
+#settings #tg_token, #settings #tg_chat{width:100%}
+#settings .tg-grid{display:grid;grid-template-columns: 1fr 1fr; gap:12px}
+@media (max-width:640px){ #settings .tg-grid{grid-template-columns: 1fr} }
+#settings .tg-actions{margin-top:8px}
