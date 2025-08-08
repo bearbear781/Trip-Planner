@@ -400,7 +400,27 @@ a[href*="#memories"], #memories { display:none !important; }
       </div>
     </div>
     <div class="small muted">注：数据保存在本机（localStorage），不上传网络。</div>
-  </section>
+  
+    <!-- Gist Sync (Cloud) -->
+    <div class="row" style="margin-top:16px">
+      <div class="col">
+        <label>GitHub Gist Token（仅勾 gist 权限）</label>
+        <input id="gist_token" type="password" placeholder="ghp_xxx" style="width:100%">
+      </div>
+      <div class="col">
+        <label>Gist ID（首次上传会自动生成）</label>
+        <input id="gist_id" type="text" placeholder="e.g. 12ab34cd..." style="width:100%">
+      </div>
+    </div>
+    <div class="row" style="gap:8px;margin-top:12px">
+      <button id="btnGistPush" class="ghost">上传到云</button>
+      <button id="btnGistPull" class="ghost">从云恢复</button>
+      <label style="display:flex;align-items:center;gap:8px">
+        <input id="gist_auto" type="checkbox"> 自动同步（保存时自动推送）
+      </label>
+    </div>
+    <small>说明：Token 与 Gist ID 仅保存在本机；换设备需重新填写。</small>
+    </section>
 
 </main>
 
@@ -451,5 +471,6 @@ a[href*="#memories"], #memories { display:none !important; }
   });
 })();
 </script>
+<script src="gist_sync.js"></script>
 </body>
 </html>
